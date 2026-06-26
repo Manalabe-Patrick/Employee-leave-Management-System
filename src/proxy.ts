@@ -8,19 +8,17 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = await getToken({ req: request });
 
-  if (!token && !authPages.includes(pathname)) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  if (token && authPages.includes(pathname)) {
-    const dashboardUrl = new URL("/dashboard", request.url);
-    return NextResponse.redirect(dashboardUrl);
-  }
-
   if (pathname === "/") {
     const target = token ? "/dashboard" : "/login";
     return NextResponse.redirect(new URL(target, request.url));
+  }
+
+  if (!token && !authPages.includes(pathname)) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (token && authPages.includes(pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
