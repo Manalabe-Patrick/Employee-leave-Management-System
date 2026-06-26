@@ -1,0 +1,78 @@
+"use client";
+
+import { signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const roleBadgeClasses: Record<string, string> = {
+  HR: "bg-blue-100 text-blue-700",
+  MANAGER: "bg-amber-100 text-amber-700",
+  EMPLOYEE: "bg-gray-100 text-gray-700",
+};
+
+type HeaderProps = {
+  user: {
+    name: string;
+    email: string;
+    role: "EMPLOYEE" | "MANAGER" | "HR";
+  };
+};
+
+export function Header({ user }: HeaderProps) {
+  const initials = user.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  return (
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+      <SidebarTrigger className="-ml-1" />
+      <Separator orientation="vertical" className="mr-2 h-4" />
+      <h1 className="text-sm font-medium">Dashboard</h1>
+
+      <div className="ml-auto">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" size="sm" className="gap-2" />
+            }
+          >
+            <div className="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+              {initials}
+            </div>
+            <span className="hidden sm:inline">{user.name}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="bottom" sideOffset={8}>
+            <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${roleBadgeClasses[user.role]}`}
+              >
+                {user.role}
+              </span>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={() => signOut({ redirectTo: "/login" })}
+            >
+              <LogOut />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </header>
+  );
+}
