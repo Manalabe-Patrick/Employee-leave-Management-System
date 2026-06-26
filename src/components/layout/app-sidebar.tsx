@@ -96,7 +96,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   tooltip={item.label}
-                  isActive={pathname === item.href}
+                  isActive={pathname === item.href || pathname.startsWith(item.href + "/")}
                   render={<Link href={item.href} />}
                 >
                   <item.icon />
@@ -116,7 +116,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       tooltip={item.label}
-                      isActive={pathname === item.href}
+                      isActive={pathname === item.href || pathname.startsWith(item.href + "/")}
                       render={<Link href={item.href} />}
                     >
                       <item.icon />
@@ -138,7 +138,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       tooltip={item.label}
-                      isActive={pathname === item.href}
+                      isActive={pathname === item.href || pathname.startsWith(item.href + "/")}
                       render={<Link href={item.href} />}
                     >
                       <item.icon />
@@ -155,7 +155,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       tooltip={item.label}
-                      isActive={pathname === item.href}
+                      isActive={pathname === item.href || pathname.startsWith(item.href + "/")}
                       render={<Link href={item.href} />}
                     >
                       <item.icon />
