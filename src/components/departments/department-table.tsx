@@ -120,9 +120,9 @@ export function DepartmentTable({ departments, users }: DepartmentTableProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(dept.id)}
-                        disabled={dept._count.employees > 0 || deletingId === dept.id}
+                        disabled={dept._count.employees > 1 || deletingId === dept.id}
                         title={
-                          dept._count.employees > 0
+                          dept._count.employees > 1
                             ? "Remove all employees before deleting"
                             : "Delete department"
                         }

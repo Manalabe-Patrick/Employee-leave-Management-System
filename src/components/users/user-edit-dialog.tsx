@@ -121,19 +121,30 @@ export function UserEditDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="user-department">Department</Label>
-              <Select value={departmentId} onValueChange={(value) => value !== null && setDepartmentId(value)}>
-                <SelectTrigger id="user-department">
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={UNASSIGNED}>Unassigned</SelectItem>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {isManager ? (
+                <div>
+                  <p className="text-sm font-medium">
+                    {departments.find((d) => d.id === user.departmentId)?.name || "Unassigned"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Set via department assignment
+                  </p>
+                </div>
+              ) : (
+                <Select value={departmentId} onValueChange={(value) => value !== null && setDepartmentId(value)}>
+                  <SelectTrigger id="user-department">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={UNASSIGNED}>Unassigned</SelectItem>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="user-role">Role</Label>

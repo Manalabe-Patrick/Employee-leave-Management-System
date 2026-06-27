@@ -84,10 +84,14 @@ export async function deleteDepartment(id: string) {
   return db.$transaction(async (tx) => {
     const department = await tx.department.findUniqueOrThrow({
       where: { id },
-      include: { _count: { select: { employees: true } } },
     });
 
-    if (department._count.employees > 0) {
+    // Count employees excluding the manager
+    const employeeCount = await tx.user.count({
+      where: { departmentId: id, id: { not: department.managerId } },
+    });
+
+    if (employeeCount > 0) {
       throw new Error("DEPARTMENT_HAS_EMPLOYEES");
     }
 
@@ -96,14 +100,20 @@ export async function deleteDepartment(id: string) {
       select: { role: true },
     });
 
-    await tx.department.delete({ where: { id } });
-
+    // Null out manager's departmentId (and demote role) before deleting
     if (manager.role !== "HR") {
       await tx.user.update({
         where: { id: department.managerId },
-        data: { role: "EMPLOYEE" },
+        data: { role: "EMPLOYEE", departmentId: null },
+      });
+    } else {
+      await tx.user.update({
+        where: { id: department.managerId },
+        data: { departmentId: null },
       });
     }
+
+    await tx.department.delete({ where: { id } });
 
     return department;
   });
