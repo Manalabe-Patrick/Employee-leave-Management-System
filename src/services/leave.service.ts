@@ -80,3 +80,92 @@ export async function getUserLeaveBalances(userId: string) {
     orderBy: { leaveType: { name: "asc" } },
   });
 }
+
+export async function submitLeaveRequest(
+  userId: string,
+  data: {
+    leaveTypeId: string;
+    startDate: Date;
+    endDate: Date;
+    reason: string;
+  }
+) {
+  return db.$transaction(async (tx) => {
+    const user = await tx.user.findUniqueOrThrow({ where: { id: userId } });
+    if (!user.departmentId) {
+      throw new Error("You must be assigned to a department before submitting leave");
+    }
+
+    const leaveType = await tx.leaveType.findUniqueOrThrow({
+      where: { id: data.leaveTypeId },
+    });
+    if (!leaveType.isActive) {
+      throw new Error("This leave type is no longer active");
+    }
+
+    const totalDays = calculateBusinessDays(data.startDate, data.endDate);
+    if (totalDays === 0) {
+      throw new Error("Selected date range contains no business days");
+    }
+
+    const currentYear = new Date().getFullYear();
+    const balance = await tx.leaveBalance.findUnique({
+      where: {
+        userId_leaveTypeId_year: {
+          userId,
+          leaveTypeId: data.leaveTypeId,
+          year: currentYear,
+        },
+      },
+    });
+    if (!balance) {
+      throw new Error("No leave balance found for this leave type");
+    }
+
+    const remaining = balance.totalAllowance - balance.usedDays - balance.pendingDays;
+    if (totalDays > remaining) {
+      throw new Error(
+        `Insufficient balance. You have ${remaining} day${remaining === 1 ? "" : "s"} remaining`
+      );
+    }
+
+    const overlap = await tx.leaveRequest.findFirst({
+      where: {
+        userId,
+        status: { not: "CANCELLED" },
+        startDate: { lte: data.endDate },
+        endDate: { gte: data.startDate },
+      },
+    });
+    if (overlap) {
+      throw new Error("You already have a leave request that overlaps with these dates");
+    }
+
+    const request = await tx.leaveRequest.create({
+      data: {
+        userId,
+        leaveTypeId: data.leaveTypeId,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        totalDays,
+        reason: data.reason,
+        status: "PENDING_MANAGER",
+      },
+    });
+
+    await tx.leaveBalance.update({
+      where: {
+        userId_leaveTypeId_year: {
+          userId,
+          leaveTypeId: data.leaveTypeId,
+          year: currentYear,
+        },
+      },
+      data: {
+        pendingDays: { increment: totalDays },
+      },
+    });
+
+    return request;
+  });
+}
