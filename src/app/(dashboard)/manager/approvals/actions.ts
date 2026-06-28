@@ -22,6 +22,7 @@ export async function managerApproveAction(requestId: string, comment: string) {
   }
 
   revalidatePath("/manager/approvals");
+  revalidatePath("/leaves");
   return { success: true };
 }
 
@@ -37,5 +38,6 @@ export async function managerDeclineAction(requestId: string, comment: string) {
   }
 
   revalidatePath("/manager/approvals");
+  revalidatePath("/leaves");
   return { success: true };
 }

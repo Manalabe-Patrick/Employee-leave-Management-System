@@ -22,6 +22,7 @@ export async function hrApproveAction(requestId: string, comment: string) {
   }
 
   revalidatePath("/hr/approvals");
+  revalidatePath("/leaves");
   return { success: true };
 }
 
@@ -37,5 +38,6 @@ export async function hrDeclineAction(requestId: string, comment: string) {
   }
 
   revalidatePath("/hr/approvals");
+  revalidatePath("/leaves");
   return { success: true };
 }

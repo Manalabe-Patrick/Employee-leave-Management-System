@@ -108,7 +108,7 @@ export async function submitLeaveRequest(
       throw new Error("Selected date range contains no business days");
     }
 
-    const currentYear = new Date().getFullYear();
+    const currentYear = data.startDate.getFullYear();
     const balance = await tx.leaveBalance.findUnique({
       where: {
         userId_leaveTypeId_year: {
@@ -197,7 +197,7 @@ export async function cancelLeaveRequest(userId: string, requestId: string) {
       data: { status: "CANCELLED" },
     });
 
-    const currentYear = new Date().getFullYear();
+    const currentYear = request.startDate.getFullYear();
     await tx.leaveBalance.update({
       where: {
         userId_leaveTypeId_year: {
@@ -284,7 +284,7 @@ export async function reviewLeaveRequest(
           },
         });
       } else {
-        const currentYear = new Date().getFullYear();
+        const currentYear = request.startDate.getFullYear();
         await tx.leaveBalance.update({
           where: {
             userId_leaveTypeId_year: {
@@ -310,7 +310,7 @@ export async function reviewLeaveRequest(
         });
       }
     } else {
-      const currentYear = new Date().getFullYear();
+      const currentYear = request.startDate.getFullYear();
       await tx.leaveBalance.update({
         where: {
           userId_leaveTypeId_year: {
