@@ -141,6 +141,12 @@ export async function submitLeaveRequest(
       throw new Error("You already have a leave request that overlaps with these dates");
     }
 
+    const isManagerOfOwnDept = await tx.department.findFirst({
+      where: { managerId: userId, id: user.departmentId ?? undefined },
+    });
+
+    const initialStatus = isManagerOfOwnDept ? "PENDING_HR" : "PENDING_MANAGER";
+
     const request = await tx.leaveRequest.create({
       data: {
         userId,
@@ -149,7 +155,9 @@ export async function submitLeaveRequest(
         endDate: data.endDate,
         totalDays,
         reason: data.reason,
-        status: "PENDING_MANAGER",
+        status: initialStatus,
+        reviewedByManagerId: isManagerOfOwnDept ? userId : undefined,
+        managerReviewedAt: isManagerOfOwnDept ? new Date() : undefined,
       },
     });
 
@@ -221,5 +229,161 @@ export async function getUserLeaveRequests(
       leaveType: { select: { id: true, name: true } },
     },
     orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function reviewLeaveRequest(
+  reviewerId: string,
+  requestId: string,
+  action: "approve" | "decline",
+  comment?: string
+) {
+  return db.$transaction(async (tx) => {
+    const request = await tx.leaveRequest.findUniqueOrThrow({
+      where: { id: requestId },
+      include: { user: { select: { departmentId: true } } },
+    });
+
+    if (request.userId === reviewerId) {
+      throw new Error("You cannot review your own leave request");
+    }
+
+    const reviewer = await tx.user.findUniqueOrThrow({
+      where: { id: reviewerId },
+    });
+
+    if (request.status === "PENDING_MANAGER") {
+      if (reviewer.role !== "MANAGER") {
+        throw new Error("Only managers can review requests at this stage");
+      }
+      const department = await tx.department.findFirst({
+        where: { managerId: reviewerId, id: request.user.departmentId ?? undefined },
+      });
+      if (!department) {
+        throw new Error("You can only review requests from your own department");
+      }
+    } else if (request.status === "PENDING_HR") {
+      if (reviewer.role !== "HR") {
+        throw new Error("Only HR can review requests at this stage");
+      }
+    } else {
+      throw new Error("This request has already been resolved");
+    }
+
+    const now = new Date();
+
+    if (action === "approve") {
+      if (request.status === "PENDING_MANAGER") {
+        return tx.leaveRequest.update({
+          where: { id: requestId },
+          data: {
+            status: "PENDING_HR",
+            reviewedByManagerId: reviewerId,
+            managerComment: comment || null,
+            managerReviewedAt: now,
+          },
+        });
+      } else {
+        const currentYear = new Date().getFullYear();
+        await tx.leaveBalance.update({
+          where: {
+            userId_leaveTypeId_year: {
+              userId: request.userId,
+              leaveTypeId: request.leaveTypeId,
+              year: currentYear,
+            },
+          },
+          data: {
+            pendingDays: { decrement: request.totalDays },
+            usedDays: { increment: request.totalDays },
+          },
+        });
+
+        return tx.leaveRequest.update({
+          where: { id: requestId },
+          data: {
+            status: "APPROVED",
+            reviewedByHRId: reviewerId,
+            hrComment: comment || null,
+            hrReviewedAt: now,
+          },
+        });
+      }
+    } else {
+      const currentYear = new Date().getFullYear();
+      await tx.leaveBalance.update({
+        where: {
+          userId_leaveTypeId_year: {
+            userId: request.userId,
+            leaveTypeId: request.leaveTypeId,
+            year: currentYear,
+          },
+        },
+        data: {
+          pendingDays: { decrement: request.totalDays },
+        },
+      });
+
+      if (request.status === "PENDING_MANAGER") {
+        return tx.leaveRequest.update({
+          where: { id: requestId },
+          data: {
+            status: "DECLINED",
+            reviewedByManagerId: reviewerId,
+            managerComment: comment || null,
+            managerReviewedAt: now,
+          },
+        });
+      } else {
+        return tx.leaveRequest.update({
+          where: { id: requestId },
+          data: {
+            status: "DECLINED",
+            reviewedByHRId: reviewerId,
+            hrComment: comment || null,
+            hrReviewedAt: now,
+          },
+        });
+      }
+    }
+  });
+}
+
+export async function getPendingManagerRequests(managerId: string) {
+  const department = await db.department.findFirst({
+    where: { managerId },
+    select: { id: true },
+  });
+
+  if (!department) return [];
+
+  return db.leaveRequest.findMany({
+    where: {
+      status: "PENDING_MANAGER",
+      user: { departmentId: department.id },
+    },
+    include: {
+      user: { select: { firstName: true, lastName: true, email: true } },
+      leaveType: { select: { name: true } },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+export async function getPendingHRRequests() {
+  return db.leaveRequest.findMany({
+    where: { status: "PENDING_HR" },
+    include: {
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          department: { select: { name: true } },
+        },
+      },
+      leaveType: { select: { name: true } },
+    },
+    orderBy: { createdAt: "asc" },
   });
 }
