@@ -3,6 +3,11 @@
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { reviewLeaveRequest } from "@/services/leave.service";
+import {
+  notifyLeaveApproved,
+  notifyLeaveDeclined,
+  getLeaveRequestWithDetails,
+} from "@/services/notification.service";
 
 async function requireHR() {
   const session = await auth();
@@ -21,8 +26,14 @@ export async function hrApproveAction(requestId: string, comment: string) {
     return { success: false, error: message };
   }
 
+  const request = await getLeaveRequestWithDetails(requestId);
+  if (request) {
+    notifyLeaveApproved(request).catch(() => {});
+  }
+
   revalidatePath("/hr/approvals");
   revalidatePath("/leaves");
+  revalidatePath("/");
   return { success: true };
 }
 
@@ -37,7 +48,13 @@ export async function hrDeclineAction(requestId: string, comment: string) {
     return { success: false, error: message };
   }
 
+  const request = await getLeaveRequestWithDetails(requestId);
+  if (request) {
+    notifyLeaveDeclined(request, session.user.name).catch(() => {});
+  }
+
   revalidatePath("/hr/approvals");
   revalidatePath("/leaves");
+  revalidatePath("/");
   return { success: true };
 }

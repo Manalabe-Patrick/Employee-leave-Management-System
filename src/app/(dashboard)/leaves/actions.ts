@@ -7,6 +7,11 @@ import {
   cancelLeaveRequest,
 } from "@/services/leave.service";
 import { parseLocalDate } from "@/lib/date-utils";
+import {
+  notifyLeaveSubmitted,
+  notifyLeaveCancelled,
+  getLeaveRequestWithDetails,
+} from "@/services/notification.service";
 
 async function requireAuth() {
   const session = await auth();
@@ -35,25 +40,37 @@ export async function submitLeaveRequestAction(formData: FormData) {
   if (isNaN(endDate.getTime())) return { success: false, error: "Invalid end date" };
   if (endDate < startDate) return { success: false, error: "End date must be on or after start date" };
 
+  let createdId: string;
   try {
-    await submitLeaveRequest(session.user.userId, {
+    const result = await submitLeaveRequest(session.user.userId, {
       leaveTypeId,
       startDate,
       endDate,
       reason: reason.trim(),
     });
+    createdId = result.id;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to submit leave request";
     return { success: false, error: message };
   }
 
+  const request = await getLeaveRequestWithDetails(createdId);
+  if (request) {
+    notifyLeaveSubmitted(request).catch(() => {});
+  }
+
   revalidatePath("/leaves");
+  revalidatePath("/");
   return { success: true };
 }
 
 export async function cancelLeaveRequestAction(requestId: string) {
   const session = await requireAuth();
   if (!session) return { success: false, error: "Unauthorized" };
+
+  // Fetch BEFORE cancelling — notifyLeaveCancelled needs the pre-cancel status
+  // to know whether HR was involved (PENDING_HR) or just the manager (PENDING_MANAGER)
+  const requestDetails = await getLeaveRequestWithDetails(requestId);
 
   try {
     await cancelLeaveRequest(session.user.userId, requestId);
@@ -62,6 +79,11 @@ export async function cancelLeaveRequestAction(requestId: string) {
     return { success: false, error: message };
   }
 
+  if (requestDetails) {
+    notifyLeaveCancelled(requestDetails).catch(() => {});
+  }
+
   revalidatePath("/leaves");
+  revalidatePath("/");
   return { success: true };
 }
