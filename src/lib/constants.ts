@@ -26,3 +26,33 @@ export const statusBadgeStyles: Record<string, { className: string; label: strin
     label: "Cancelled",
   },
 };
+
+export const LEAVE_TYPE_COLORS = [
+  "bg-blue-100 text-blue-700",
+  "bg-emerald-100 text-emerald-700",
+  "bg-violet-100 text-violet-700",
+  "bg-rose-100 text-rose-700",
+  "bg-amber-100 text-amber-700",
+  "bg-cyan-100 text-cyan-700",
+  "bg-pink-100 text-pink-700",
+  "bg-teal-100 text-teal-700",
+];
+
+export const LEAVE_TYPE_DOT_COLORS = [
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-violet-500",
+  "bg-rose-500",
+  "bg-amber-500",
+  "bg-cyan-500",
+  "bg-pink-500",
+  "bg-teal-500",
+];
+
+export function getLeaveTypeColorIndex(leaveTypeId: string): number {
+  let hash = 0;
+  for (let i = 0; i < leaveTypeId.length; i++) {
+    hash = (hash * 31 + leaveTypeId.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) % LEAVE_TYPE_COLORS.length;
+}
