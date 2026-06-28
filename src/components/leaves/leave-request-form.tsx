@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { submitLeaveRequestAction } from "@/app/(dashboard)/leaves/actions";
-import { calculateBusinessDays } from "@/lib/date-utils";
+import { calculateBusinessDays, parseLocalDate } from "@/lib/date-utils";
 
 interface LeaveBalance {
   id: string;
@@ -53,7 +53,7 @@ export function LeaveRequestForm({ balances }: LeaveRequestFormProps) {
 
   let businessDays = 0;
   if (startDate && endDate) {
-    businessDays = calculateBusinessDays(new Date(startDate), new Date(endDate));
+    businessDays = calculateBusinessDays(parseLocalDate(startDate), parseLocalDate(endDate));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -63,7 +63,7 @@ export function LeaveRequestForm({ balances }: LeaveRequestFormProps) {
     if (!leaveTypeId) { setError("Please select a leave type"); return; }
     if (!startDate) { setError("Please select a start date"); return; }
     if (!endDate) { setError("Please select an end date"); return; }
-    if (new Date(endDate) < new Date(startDate)) { setError("End date must be on or after start date"); return; }
+    if (parseLocalDate(endDate) < parseLocalDate(startDate)) { setError("End date must be on or after start date"); return; }
     if (businessDays === 0) { setError("Selected date range contains no business days"); return; }
     if (!reason.trim()) { setError("Please provide a reason"); return; }
     if (remaining !== null && businessDays > remaining) {
@@ -146,7 +146,7 @@ export function LeaveRequestForm({ balances }: LeaveRequestFormProps) {
               </div>
             </div>
 
-            {startDate && endDate && new Date(endDate) >= new Date(startDate) && (
+            {startDate && endDate && parseLocalDate(endDate) >= parseLocalDate(startDate) && (
               <p className="text-sm text-muted-foreground">
                 {businessDays} business day{businessDays === 1 ? "" : "s"}
                 {remaining !== null && (

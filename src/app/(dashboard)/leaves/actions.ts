@@ -6,6 +6,7 @@ import {
   submitLeaveRequest,
   cancelLeaveRequest,
 } from "@/services/leave.service";
+import { parseLocalDate } from "@/lib/date-utils";
 
 async function requireAuth() {
   const session = await auth();
@@ -27,8 +28,8 @@ export async function submitLeaveRequestAction(formData: FormData) {
   if (!endDateRaw) return { success: false, error: "End date is required" };
   if (!reason || !reason.trim()) return { success: false, error: "Reason is required" };
 
-  const startDate = new Date(startDateRaw);
-  const endDate = new Date(endDateRaw);
+  const startDate = parseLocalDate(startDateRaw);
+  const endDate = parseLocalDate(endDateRaw);
 
   if (isNaN(startDate.getTime())) return { success: false, error: "Invalid start date" };
   if (isNaN(endDate.getTime())) return { success: false, error: "Invalid end date" };
