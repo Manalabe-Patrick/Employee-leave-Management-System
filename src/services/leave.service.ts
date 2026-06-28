@@ -169,3 +169,57 @@ export async function submitLeaveRequest(
     return request;
   });
 }
+
+export async function cancelLeaveRequest(userId: string, requestId: string) {
+  return db.$transaction(async (tx) => {
+    const request = await tx.leaveRequest.findUniqueOrThrow({
+      where: { id: requestId },
+    });
+
+    if (request.userId !== userId) {
+      throw new Error("You can only cancel your own leave requests");
+    }
+
+    if (request.status !== "PENDING_MANAGER" && request.status !== "PENDING_HR") {
+      throw new Error("Only pending requests can be cancelled");
+    }
+
+    const updated = await tx.leaveRequest.update({
+      where: { id: requestId },
+      data: { status: "CANCELLED" },
+    });
+
+    const currentYear = new Date().getFullYear();
+    await tx.leaveBalance.update({
+      where: {
+        userId_leaveTypeId_year: {
+          userId,
+          leaveTypeId: request.leaveTypeId,
+          year: currentYear,
+        },
+      },
+      data: {
+        pendingDays: { decrement: request.totalDays },
+      },
+    });
+
+    return updated;
+  });
+}
+
+export async function getUserLeaveRequests(
+  userId: string,
+  filters?: { status?: string; leaveTypeId?: string }
+) {
+  const where: Record<string, unknown> = { userId };
+  if (filters?.status) where.status = filters.status;
+  if (filters?.leaveTypeId) where.leaveTypeId = filters.leaveTypeId;
+
+  return db.leaveRequest.findMany({
+    where,
+    include: {
+      leaveType: { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
