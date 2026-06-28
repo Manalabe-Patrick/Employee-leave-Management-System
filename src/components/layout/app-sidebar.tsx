@@ -35,6 +35,7 @@ type NavItem = {
 const commonItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My Leaves", href: "/leaves", icon: CalendarDays },
+  { label: "Team Calendar", href: "/calendar", icon: Calendar },
 ];
 
 const managerItems: NavItem[] = [
