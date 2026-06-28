@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, X } from "lucide-react";
 import { cancelLeaveRequestAction } from "@/app/(dashboard)/leaves/actions";
+import { statusBadgeStyles } from "@/lib/constants";
 
 interface LeaveRequest {
   id: string;
@@ -53,29 +54,6 @@ interface LeaveHistoryTableProps {
 }
 
 const STATUS_ALL = "__all__";
-
-const statusBadgeStyles: Record<string, { className: string; label: string }> = {
-  PENDING_MANAGER: {
-    className: "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
-    label: "Pending Manager",
-  },
-  PENDING_HR: {
-    className: "bg-amber-100 text-amber-700 hover:bg-amber-100",
-    label: "Pending HR",
-  },
-  APPROVED: {
-    className: "bg-green-100 text-green-700 hover:bg-green-100",
-    label: "Approved",
-  },
-  DECLINED: {
-    className: "bg-red-100 text-red-700 hover:bg-red-100",
-    label: "Declined",
-  },
-  CANCELLED: {
-    className: "bg-gray-100 text-gray-500 hover:bg-gray-100",
-    label: "Cancelled",
-  },
-};
 
 function formatDate(date: string | Date) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -129,7 +107,7 @@ export function LeaveHistoryTable({
     <>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">My Leaves</h1>
-        <Button render={<Link href="/leaves/new" />}>
+        <Button nativeButton={false} render={<Link href="/leaves/new" />}>
           <Plus className="mr-2 h-4 w-4" />
           Request Leave
         </Button>

@@ -387,3 +387,36 @@ export async function getPendingHRRequests() {
     orderBy: { createdAt: "asc" },
   });
 }
+
+export async function getRecentLeaveRequests(userId: string, limit: number) {
+  return db.leaveRequest.findMany({
+    where: { userId },
+    include: {
+      leaveType: { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+}
+
+export async function getPendingManagerCount(managerId: string) {
+  const department = await db.department.findFirst({
+    where: { managerId },
+    select: { id: true },
+  });
+
+  if (!department) return 0;
+
+  return db.leaveRequest.count({
+    where: {
+      status: "PENDING_MANAGER",
+      user: { departmentId: department.id },
+    },
+  });
+}
+
+export async function getPendingHRCount() {
+  return db.leaveRequest.count({
+    where: { status: "PENDING_HR" },
+  });
+}
