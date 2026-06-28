@@ -1,4 +1,7 @@
 import { db } from "@/lib/db";
+import { calculateBusinessDays } from "@/lib/date-utils";
+
+export { calculateBusinessDays };
 
 export async function getAllLeaveTypes() {
   return db.leaveType.findMany({
@@ -58,5 +61,22 @@ export async function toggleLeaveTypeActive(id: string) {
   return db.leaveType.update({
     where: { id },
     data: { isActive: !leaveType.isActive },
+  });
+}
+
+export async function getUserLeaveBalances(userId: string) {
+  const currentYear = new Date().getFullYear();
+  return db.leaveBalance.findMany({
+    where: {
+      userId,
+      year: currentYear,
+      leaveType: { isActive: true },
+    },
+    include: {
+      leaveType: {
+        select: { id: true, name: true, isActive: true },
+      },
+    },
+    orderBy: { leaveType: { name: "asc" } },
   });
 }
