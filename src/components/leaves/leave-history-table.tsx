@@ -107,7 +107,7 @@ export function LeaveHistoryTable({
     <>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">My Leaves</h1>
-        <Button nativeButton={false} render={<Link href="/leaves/new" />}>
+        <Button render={<Link href="/leaves/new" />}>
           <Plus className="mr-2 h-4 w-4" />
           Request Leave
         </Button>
