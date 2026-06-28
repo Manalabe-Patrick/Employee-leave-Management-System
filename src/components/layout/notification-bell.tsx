@@ -52,11 +52,16 @@ export function NotificationBell({
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
 
   async function handleNotificationClick(id: string) {
+    const notification = notifications.find((n) => n.id === id);
+    const wasUnread = notification && !notification.isRead;
+
     await fetch(`/api/notifications/${id}`, { method: "PATCH" });
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
     );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
+    if (wasUnread) {
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    }
     router.push("/leaves");
   }
 
