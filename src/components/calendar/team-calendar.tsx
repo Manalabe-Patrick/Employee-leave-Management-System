@@ -50,7 +50,7 @@ export function TeamCalendar({
         month: String(m),
         year: String(y),
       });
-      if (role === "HR" && deptIds && deptIds.length > 0) {
+      if (deptIds && deptIds.length > 0) {
         params.set("departmentIds", deptIds.join(","));
       }
       const res = await fetch(`/api/calendar?${params}`);

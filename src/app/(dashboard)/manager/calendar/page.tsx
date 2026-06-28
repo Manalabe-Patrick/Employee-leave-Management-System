@@ -2,24 +2,19 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getCalendarLeaves } from "@/services/calendar.service";
 import { TeamCalendar } from "@/components/calendar/team-calendar";
-import { db } from "@/lib/db";
 
 export default async function ManagerCalendarPage() {
   const session = await auth();
   if (!session || session.user.role !== "MANAGER") redirect("/dashboard");
 
-  const department = await db.department.findFirst({
-    where: { managerId: session.user.userId },
-    select: { id: true },
-  });
-
-  if (!department) redirect("/dashboard");
+  const { departmentId } = session.user;
+  if (!departmentId) redirect("/dashboard");
 
   const now = new Date();
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
 
-  const leaves = await getCalendarLeaves(month, year, [department.id]);
+  const leaves = await getCalendarLeaves(month, year, [departmentId]);
 
   return (
     <div className="space-y-4">
@@ -29,6 +24,7 @@ export default async function ManagerCalendarPage() {
         initialMonth={month}
         initialYear={year}
         role="MANAGER"
+        initialDepartmentIds={[departmentId]}
       />
     </div>
   );

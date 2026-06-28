@@ -34,6 +34,7 @@ export default async function EmployeeCalendarPage() {
         initialMonth={month}
         initialYear={year}
         role={role}
+        initialDepartmentIds={[departmentId]}
       />
     </div>
   );

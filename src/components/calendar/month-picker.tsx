@@ -48,7 +48,7 @@ export function MonthPicker({ month, year, onChange }: MonthPickerProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="sm" onClick={handlePrev}>
+      <Button variant="outline" size="sm" onClick={handlePrev} aria-label="Previous month">
         <ChevronLeft className="size-4" />
       </Button>
 
@@ -84,7 +84,7 @@ export function MonthPicker({ month, year, onChange }: MonthPickerProps) {
         </SelectContent>
       </Select>
 
-      <Button variant="outline" size="sm" onClick={handleNext}>
+      <Button variant="outline" size="sm" onClick={handleNext} aria-label="Next month">
         <ChevronRight className="size-4" />
       </Button>
     </div>
