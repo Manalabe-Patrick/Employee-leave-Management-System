@@ -1,19 +1,21 @@
 "use client";
 
-import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
+import { logout } from "@/app/(dashboard)/actions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { roleBadgeClasses } from "@/lib/constants";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 type HeaderProps = {
   user: {
@@ -21,9 +23,19 @@ type HeaderProps = {
     email: string;
     role: "EMPLOYEE" | "MANAGER" | "HR";
   };
+  notifications: {
+    id: string;
+    title: string;
+    message: string;
+    type: string;
+    isRead: boolean;
+    createdAt: Date | string;
+    leaveRequest: { id: string } | null;
+  }[];
+  unreadCount: number;
 };
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, notifications, unreadCount }: HeaderProps) {
   const initials = user.name
     .split(" ")
     .map((n) => n[0])
@@ -37,7 +49,8 @@ export function Header({ user }: HeaderProps) {
       <Separator orientation="vertical" className="mr-2 h-4" />
       <h1 className="text-sm font-medium">Dashboard</h1>
 
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-1">
+        <NotificationBell notifications={notifications} unreadCount={unreadCount} />
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -50,17 +63,19 @@ export function Header({ user }: HeaderProps) {
             <span className="hidden sm:inline">{user.name}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="bottom" sideOffset={8}>
-            <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
-            <DropdownMenuLabel>
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${roleBadgeClasses[user.role]}`}
-              >
-                {user.role}
-              </span>
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                <span
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${roleBadgeClasses[user.role]}`}
+                >
+                  {user.role}
+                </span>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={() => signOut({ redirectTo: "/login" })}
+              onClick={() => logout()}
             >
               <LogOut />
               Log out
