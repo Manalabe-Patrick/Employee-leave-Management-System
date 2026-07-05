@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 192.168.1.89 --port 4055",
+    "dev": "next dev --port 4055",
     "build": "prisma generate && next build",
     "start": "next start --port 4055",
     "lint": "eslint",
