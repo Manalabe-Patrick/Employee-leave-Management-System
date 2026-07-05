@@ -7,7 +7,7 @@ import {
   updateLeaveType,
   toggleLeaveTypeActive,
 } from "@/services/leave.service";
-import { PrismaClientKnownRequestError } from "@/generated/prisma/internal/prismaNamespace";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 async function requireHR() {
   const session = await auth();

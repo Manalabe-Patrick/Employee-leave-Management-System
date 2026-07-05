@@ -7,7 +7,7 @@ import {
   updateDepartment,
   deleteDepartment,
 } from "@/services/department.service";
-import { PrismaClientKnownRequestError } from "@/generated/prisma/internal/prismaNamespace";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 async function requireHR() {
   const session = await auth();
