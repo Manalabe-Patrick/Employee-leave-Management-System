@@ -89,6 +89,32 @@ export function LeaveRequestForm({ balances }: LeaveRequestFormProps) {
     router.push("/leaves");
   }
 
+  if (balances.length === 0) {
+    return (
+      <Card className="max-w-lg">
+        <CardHeader>
+          <CardTitle>Request Leave</CardTitle>
+          <CardDescription>
+            Submit a new leave request for approval.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            No leave types available. Please contact HR to ensure you are
+            assigned to a department and have leave balances for this year.
+          </p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => router.push("/leaves")}
+          >
+            Back
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="max-w-lg">
       <CardHeader>

@@ -56,11 +56,11 @@ export function RecentRequests({ requests }: RecentRequestsProps) {
       </div>
 
       {requests.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           No leave requests yet
         </div>
       ) : (
-        <div className="rounded-md border">
+        <div className="overflow-hidden rounded-2xl bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_14px_rgba(0,0,0,0.04)]">
           <Table>
             <TableHeader>
               <TableRow>

@@ -35,6 +35,12 @@ type HeaderProps = {
   unreadCount: number;
 };
 
+const roleLabels: Record<string, string> = {
+  EMPLOYEE: "Employee",
+  MANAGER: "Manager",
+  HR: "HR Admin",
+};
+
 export function Header({ user, notifications, unreadCount }: HeaderProps) {
   const initials = user.name
     .split(" ")
@@ -44,25 +50,31 @@ export function Header({ user, notifications, unreadCount }: HeaderProps) {
     .slice(0, 2);
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border/30 bg-card/60 px-4 backdrop-blur-sm md:px-6">
       <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-2 h-4" />
-      <h1 className="text-sm font-medium">Dashboard</h1>
+      <Separator orientation="vertical" className="mr-1 h-5 bg-border/40" />
+      <h1 className="text-sm font-semibold tracking-tight text-foreground/80">Dashboard</h1>
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-2">
         <NotificationBell notifications={notifications} unreadCount={unreadCount} />
+
+        <Separator orientation="vertical" className="mx-1 hidden h-5 bg-border/60 sm:block" />
+
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button variant="ghost" size="sm" className="gap-2" />
+              <Button variant="ghost" size="sm" className="gap-3 rounded-xl px-2 hover:bg-sidebar-accent" />
             }
           >
-            <div className="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+            <div className="flex size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold shadow-sm">
               {initials}
             </div>
-            <span className="hidden sm:inline">{user.name}</span>
+            <div className="hidden text-left sm:block">
+              <div className="text-sm font-semibold leading-tight">{user.name}</div>
+              <div className="text-xs text-muted-foreground leading-tight">{roleLabels[user.role] ?? user.role}</div>
+            </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" side="bottom" sideOffset={8}>
+          <DropdownMenuContent align="end" side="bottom" sideOffset={8} className="min-w-48">
             <DropdownMenuGroup>
               <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
               <DropdownMenuLabel>

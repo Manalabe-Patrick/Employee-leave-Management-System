@@ -53,29 +53,29 @@ export function ReportFilters({
 
   return (
     <div className="flex flex-wrap items-end gap-4">
-      <div className="space-y-1">
-        <Label htmlFor="startDate">Start Date</Label>
+      <div className="space-y-1.5">
+        <Label htmlFor="startDate" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Start Date</Label>
         <Input
           id="startDate"
           type="date"
           value={start}
           onChange={(e) => setStart(e.target.value)}
-          className="w-40"
+          className="w-40 rounded-lg"
         />
       </div>
-      <div className="space-y-1">
-        <Label htmlFor="endDate">End Date</Label>
+      <div className="space-y-1.5">
+        <Label htmlFor="endDate" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">End Date</Label>
         <Input
           id="endDate"
           type="date"
           value={end}
           onChange={(e) => setEnd(e.target.value)}
-          className="w-40"
+          className="w-40 rounded-lg"
         />
       </div>
       {showDepartments && departments && (
-        <div className="space-y-1">
-          <Label>Departments</Label>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Departments</Label>
           <DepartmentFilter
             departments={departments}
             selected={deptIds}
@@ -83,11 +83,11 @@ export function ReportFilters({
           />
         </div>
       )}
-      <Button onClick={handleApply} size="sm" className="gap-2">
+      <Button onClick={handleApply} size="sm" className="gap-2 rounded-full px-5">
         <Search className="size-4" />
         Apply
       </Button>
-      <Button onClick={handleReset} variant="outline" size="sm" className="gap-2">
+      <Button onClick={handleReset} variant="outline" size="sm" className="gap-2 rounded-full px-5">
         <RotateCcw className="size-4" />
         Reset
       </Button>

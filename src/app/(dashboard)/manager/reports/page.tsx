@@ -38,33 +38,36 @@ export default async function ManagerReportsPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Department Reports</h1>
+      <div>
+        <h1 className="text-xl font-semibold">Department Reports</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Leave usage analytics for your department
+        </p>
+      </div>
 
-      <ReportFilters startDate={startDate} endDate={endDate} />
+      <Card>
+        <CardContent className="pt-6">
+          <ReportFilters startDate={startDate} endDate={endDate} />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Days Used</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{totalDaysUsed}</p>
+          <CardContent className="pt-6 pb-6">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Days Used</p>
+            <p className="text-3xl font-bold mt-2">{totalDaysUsed}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Employees</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{uniqueEmployees}</p>
+          <CardContent className="pt-6 pb-6">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Employees</p>
+            <p className="text-3xl font-bold mt-2">{uniqueEmployees}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Most Used Type</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{mostUsedType}</p>
+          <CardContent className="pt-6 pb-6">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Most Used Type</p>
+            <p className="text-3xl font-bold mt-2">{mostUsedType}</p>
           </CardContent>
         </Card>
       </div>
@@ -74,9 +77,9 @@ export default async function ManagerReportsPage({
         <UsageByTypeChart data={usageByType} variant="pie" />
       </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Balance Overview</h2>
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-lg font-semibold">Balance Overview</CardTitle>
           <div className="flex gap-2">
             <CsvExportButton
               startDate={startDate}
@@ -91,9 +94,11 @@ export default async function ManagerReportsPage({
               exportType="balances"
             />
           </div>
-        </div>
-        <BalanceTable data={balances} />
-      </div>
+        </CardHeader>
+        <CardContent className="px-0 pb-0">
+          <BalanceTable data={balances} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

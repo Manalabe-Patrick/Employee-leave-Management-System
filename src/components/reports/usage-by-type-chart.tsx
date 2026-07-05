@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+const COLORS = ["#C45A3C", "#E8967F", "#1A1A1A", "#A3A3A3", "#D4886E", "#8B4332", "#F0C4B8", "#6B3425"];
 
 type UsageByTypeChartProps = {
   data: { leaveTypeName: string; totalDays: number }[];
@@ -47,7 +47,7 @@ export function UsageByTypeChart({ data, variant = "pie" }: UsageByTypeChartProp
               <XAxis type="number" allowDecimals={false} />
               <YAxis type="category" dataKey="leaveTypeName" width={120} />
               <Tooltip formatter={(value) => [`${value} days`, "Total"]} />
-              <Bar dataKey="totalDays" radius={[0, 4, 4, 0]}>
+              <Bar dataKey="totalDays" radius={[0, 6, 6, 0]}>
                 {data.map((_, index) => (
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}

@@ -85,6 +85,11 @@ export function TeamCalendar({
     today.getFullYear() === year && today.getMonth() + 1 === month
       ? today.getDate()
       : -1;
+  const todayDate = today.getDate();
+  const todayDayName = today.toLocaleDateString("en-US", { weekday: "short" });
+  const todayMonthName = today.toLocaleDateString("en-US", {
+    month: "long",
+  });
 
   const cells: { day: number; isCurrentMonth: boolean }[] = [];
 
@@ -108,9 +113,23 @@ export function TeamCalendar({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <MonthPicker month={month} year={year} onChange={handleMonthChange} />
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-12 items-center justify-center rounded-full border-2 border-foreground/10 text-lg font-bold tabular-nums">
+              {todayDate}
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-xs text-muted-foreground">
+                {todayDayName},
+              </span>
+              <span className="text-sm font-semibold">{todayMonthName}</span>
+            </div>
+          </div>
+          <div className="hidden h-8 w-px bg-border sm:block" />
+          <MonthPicker month={month} year={year} onChange={handleMonthChange} />
+        </div>
         {role === "HR" && departments && (
           <DepartmentFilter
             departments={departments}
@@ -120,35 +139,37 @@ export function TeamCalendar({
         )}
       </div>
 
-      <div className="relative">
-        {loading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 rounded-lg">
-            <span className="text-sm text-muted-foreground">Loading...</span>
-          </div>
-        )}
-
-        <div className="grid grid-cols-7 gap-px">
-          {DAY_HEADERS.map((d) => (
-            <div
-              key={d}
-              className="py-2 text-center text-xs font-medium text-muted-foreground"
-            >
-              {d}
+      <div className="rounded-2xl bg-muted/30 p-3">
+        <div className="relative">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-card/80 backdrop-blur-sm">
+              <span className="text-sm text-muted-foreground">Loading...</span>
             </div>
-          ))}
-          {cells.map((cell, i) => (
-            <CalendarDay
-              key={i}
-              day={cell.day}
-              isToday={cell.isCurrentMonth && cell.day === todayDay}
-              isCurrentMonth={cell.isCurrentMonth}
-              leaves={
-                cell.isCurrentMonth
-                  ? getLeavesForDay(leaves, year, month, cell.day)
-                  : []
-              }
-            />
-          ))}
+          )}
+
+          <div className="grid grid-cols-7 gap-1.5">
+            {DAY_HEADERS.map((d) => (
+              <div
+                key={d}
+                className="py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                {d}
+              </div>
+            ))}
+            {cells.map((cell, i) => (
+              <CalendarDay
+                key={i}
+                day={cell.day}
+                isToday={cell.isCurrentMonth && cell.day === todayDay}
+                isCurrentMonth={cell.isCurrentMonth}
+                leaves={
+                  cell.isCurrentMonth
+                    ? getLeavesForDay(leaves, year, month, cell.day)
+                    : []
+                }
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

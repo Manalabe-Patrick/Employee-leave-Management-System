@@ -84,9 +84,11 @@ export function NotificationBell({
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="bottom" sideOffset={8} className="w-80">
-        <DropdownMenuLabel className="text-sm font-semibold text-foreground">
-          Notifications
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-sm font-semibold text-foreground">
+            Notifications
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {notifications.length === 0 ? (
           <div className="px-4 py-6 text-center text-sm text-muted-foreground">

@@ -13,13 +13,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -27,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ArrowRight, SlidersHorizontal } from "lucide-react";
 import { cancelLeaveRequestAction } from "@/app/(dashboard)/leaves/actions";
 import { statusBadgeStyles } from "@/lib/constants";
 
@@ -48,12 +41,29 @@ interface LeaveTypeOption {
   name: string;
 }
 
+interface LeaveBalance {
+  totalAllowance: number;
+  usedDays: number;
+  pendingDays: number;
+  leaveType: { id: string; name: string };
+}
+
 interface LeaveHistoryTableProps {
   requests: LeaveRequest[];
   leaveTypes: LeaveTypeOption[];
+  balances?: LeaveBalance[];
+  userName?: string;
 }
 
 const STATUS_ALL = "__all__";
+
+const STATUS_OPTIONS = [
+  { value: STATUS_ALL, label: "All" },
+  { value: "PENDING_MANAGER", label: "Pending" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "DECLINED", label: "Declined" },
+  { value: "CANCELLED", label: "Cancelled" },
+];
 
 function formatDate(date: string | Date) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -66,6 +76,8 @@ function formatDate(date: string | Date) {
 export function LeaveHistoryTable({
   requests,
   leaveTypes,
+  balances = [],
+  userName,
 }: LeaveHistoryTableProps) {
   const [statusFilter, setStatusFilter] = useState(STATUS_ALL);
   const [typeFilter, setTypeFilter] = useState(STATUS_ALL);
@@ -103,109 +115,246 @@ export function LeaveHistoryTable({
     setCancellingId(null);
   }
 
+  const now = new Date();
+  const day = now.getDate();
+  const weekday = now.toLocaleDateString("en-US", { weekday: "short" });
+  const month = now.toLocaleDateString("en-US", { month: "long" });
+  const firstName = userName?.split(" ")[0] ?? "there";
+
+  const totalUsed = balances.reduce((s, b) => s + b.usedDays, 0);
+  const totalAllowance = balances.reduce((s, b) => s + b.totalAllowance, 0);
+  const totalPending = balances.reduce((s, b) => s + b.pendingDays, 0);
+  const totalRemaining = totalAllowance - totalUsed - totalPending;
+
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">My Leaves</h1>
-        <Button render={<Link href="/leaves/new" />}>
-          <Plus className="mr-2 h-4 w-4" />
-          Request Leave
-        </Button>
-      </div>
+      <div className="space-y-6">
+        {/* ── Header ── */}
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-foreground/10">
+              <span className="text-xl font-bold leading-none">{day}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div>
+                <p className="text-sm font-semibold">{weekday},</p>
+                <p className="text-xs text-muted-foreground">{month}</p>
+              </div>
+              <div className="mx-1 h-8 w-px bg-border" />
+              <Button
+                nativeButton={false}
+                render={<Link href="/leaves/new" />}
+                className="rounded-full px-5"
+              >
+                Request Leave <ArrowRight className="ml-2 size-4" />
+              </Button>
+            </div>
+          </div>
 
-      <div className="flex gap-4 mb-4">
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? STATUS_ALL)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All Statuses" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={STATUS_ALL}>All Statuses</SelectItem>
-            <SelectItem value="PENDING_MANAGER">Pending Manager</SelectItem>
-            <SelectItem value="PENDING_HR">Pending HR</SelectItem>
-            <SelectItem value="APPROVED">Approved</SelectItem>
-            <SelectItem value="DECLINED">Declined</SelectItem>
-            <SelectItem value="CANCELLED">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
+          <div className="sm:text-right">
+            <h1 className="text-2xl font-bold tracking-tight">
+              Hey, {firstName}
+            </h1>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Manage your time off
+            </p>
+          </div>
+        </div>
 
-        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v ?? STATUS_ALL)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All Types" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={STATUS_ALL}>All Types</SelectItem>
-            {leaveTypes.map((lt) => (
-              <SelectItem key={lt.id} value={lt.id}>
-                {lt.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        {/* ── Activity section ── */}
+        <div className="rounded-2xl bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_14px_rgba(0,0,0,0.04)]">
+          {/* Activity header */}
+          <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-border/60">
+            <div className="flex items-center gap-3">
+              <h2 className="text-base font-semibold">Leave History</h2>
+              <SlidersHorizontal className="size-4 text-muted-foreground" />
+            </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Leave Type</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead className="text-center">Days</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Submitted</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center text-muted-foreground py-8"
+            {/* Filter chips */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Status filter chips */}
+              {STATUS_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setStatusFilter(opt.value)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                    statusFilter === opt.value
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-transparent text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                  }`}
                 >
-                  No leave requests found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filtered.map((r) => {
-                const badge = statusBadgeStyles[r.status] ?? {
-                  className: "",
-                  label: r.status,
-                };
-                const canCancel =
-                  r.status === "PENDING_MANAGER" || r.status === "PENDING_HR";
+                  {statusFilter === opt.value && (
+                    <span className="size-1.5 rounded-full bg-primary-foreground" />
+                  )}
+                  {opt.label}
+                  {statusFilter === opt.value && opt.value !== STATUS_ALL && (
+                    <X
+                      className="size-3 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setStatusFilter(STATUS_ALL);
+                      }}
+                    />
+                  )}
+                </button>
+              ))}
 
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-medium">
-                      {r.leaveType.name}
-                    </TableCell>
-                    <TableCell>{formatDate(r.startDate)}</TableCell>
-                    <TableCell>{formatDate(r.endDate)}</TableCell>
-                    <TableCell className="text-center">{r.totalDays}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className={badge.className}>
-                        {badge.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(r.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      {canCancel && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openCancelDialog(r.id)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+              {/* Type filter */}
+              {leaveTypes.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-border" />
+                  {leaveTypes.map((lt) => (
+                    <button
+                      key={lt.id}
+                      onClick={() =>
+                        setTypeFilter(typeFilter === lt.id ? STATUS_ALL : lt.id)
+                      }
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                        typeFilter === lt.id
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-transparent text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                      }`}
+                    >
+                      {typeFilter === lt.id && (
+                        <span className="size-1.5 rounded-full bg-primary-foreground" />
                       )}
+                      {lt.name}
+                      {typeFilter === lt.id && (
+                        <X
+                          className="size-3 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTypeFilter(STATUS_ALL);
+                          }}
+                        />
+                      )}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Leave Type
+                  </TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Start
+                  </TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    End
+                  </TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium text-center">
+                    Days
+                  </TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Submitted
+                  </TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium text-right">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={7}
+                      className="text-center text-muted-foreground py-12"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="size-10 rounded-full bg-muted flex items-center justify-center">
+                          <SlidersHorizontal className="size-4 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm">No leave requests found</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-1 rounded-full"
+                          nativeButton={false}
+                          render={<Link href="/leaves/new" />}
+                        >
+                          <Plus className="mr-1 h-3.5 w-3.5" />
+                          Request Leave
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                ) : (
+                  filtered.map((r) => {
+                    const badge = statusBadgeStyles[r.status] ?? {
+                      className: "",
+                      label: r.status,
+                    };
+                    const canCancel =
+                      r.status === "PENDING_MANAGER" || r.status === "PENDING_HR";
+
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-medium">
+                          {r.leaveType.name}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(r.startDate)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(r.endDate)}
+                        </TableCell>
+                        <TableCell className="text-center font-semibold">
+                          {r.totalDays}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="secondary"
+                            className={`rounded-full ${badge.className}`}
+                          >
+                            {badge.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {formatDate(r.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {canCancel && (
+                            <button
+                              onClick={() => openCancelDialog(r.id)}
+                              className="inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <X className="size-4" />
+                            </button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Footer summary */}
+          {filtered.length > 0 && (
+            <div className="flex items-center justify-between border-t border-border/60 px-5 py-3">
+              <p className="text-xs text-muted-foreground">
+                {filtered.length} request{filtered.length !== 1 ? "s" : ""}
+              </p>
+              {totalRemaining > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {totalRemaining} day{totalRemaining !== 1 ? "s" : ""} remaining
+                  this year
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>

@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
+import { PageTransition } from "@/components/layout/page-transition";
 import { getUserNotifications, getUnreadCount } from "@/services/notification.service";
 
 export default async function DashboardLayout({
@@ -36,7 +37,7 @@ export default async function DashboardLayout({
         <AppSidebar user={user} />
         <SidebarInset>
           <Header user={user} notifications={serializedNotifications} unreadCount={unreadCount} />
-          <main className="flex-1 p-4 md:p-6">{children}</main>
+          <main className="flex-1 p-4 md:p-6"><PageTransition>{children}</PageTransition></main>
         </SidebarInset>
       </TooltipProvider>
     </SidebarProvider>

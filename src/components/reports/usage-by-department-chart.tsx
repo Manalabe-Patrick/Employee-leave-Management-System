@@ -39,7 +39,7 @@ export function UsageByDepartmentChart({ data }: UsageByDepartmentChartProps) {
             <XAxis type="number" allowDecimals={false} />
             <YAxis type="category" dataKey="departmentName" width={120} />
             <Tooltip formatter={(value) => [`${value} days`, "Total"]} />
-            <Bar dataKey="totalDays" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="totalDays" fill="oklch(0.58 0.14 32)" radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

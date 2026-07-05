@@ -31,6 +31,24 @@ export async function createDepartment(data: {
       data: { role: "MANAGER", departmentId: department.id },
     });
 
+    const activeLeaveTypes = await tx.leaveType.findMany({
+      where: { isActive: true },
+      select: { id: true, defaultAllowance: true },
+    });
+
+    if (activeLeaveTypes.length > 0) {
+      const currentYear = new Date().getFullYear();
+      await tx.leaveBalance.createMany({
+        data: activeLeaveTypes.map((lt) => ({
+          userId: data.managerId,
+          leaveTypeId: lt.id,
+          year: currentYear,
+          totalAllowance: lt.defaultAllowance,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
     return department;
   });
 }
@@ -74,6 +92,24 @@ export async function updateDepartment(
         where: { id: data.managerId },
         data: { role: "MANAGER", departmentId: department.id },
       });
+
+      const activeLeaveTypes = await tx.leaveType.findMany({
+        where: { isActive: true },
+        select: { id: true, defaultAllowance: true },
+      });
+
+      if (activeLeaveTypes.length > 0) {
+        const currentYear = new Date().getFullYear();
+        await tx.leaveBalance.createMany({
+          data: activeLeaveTypes.map((lt) => ({
+            userId: data.managerId,
+            leaveTypeId: lt.id,
+            year: currentYear,
+            totalAllowance: lt.defaultAllowance,
+          })),
+          skipDuplicates: true,
+        });
+      }
     }
 
     return department;

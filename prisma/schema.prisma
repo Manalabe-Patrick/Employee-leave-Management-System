@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  HR
+}
+
+enum LeaveRequestStatus {
+  PENDING_MANAGER
+  PENDING_HR
+  APPROVED
+  DECLINED
+  CANCELLED
+}
+
+enum NotificationType {
+  LEAVE_SUBMITTED
+  LEAVE_APPROVED
+  LEAVE_DECLINED
+  LEAVE_CANCELLED
+  BALANCE_UPDATED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  password     String
+  firstName    String
+  lastName     String
+  role         Role     @default(EMPLOYEE)
+  departmentId String?  @db.Uuid
+  profileImage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department           Department?    @relation("DepartmentEmployees", fields: [departmentId], references: [id])
+  managedDepartment    Department?    @relation("DepartmentManager")
+  leaveRequests        LeaveRequest[] @relation("UserLeaveRequests")
+  managerReviews       LeaveRequest[] @relation("ManagerReviews")
+  hrReviews            LeaveRequest[] @relation("HRReviews")
+  leaveBalances        LeaveBalance[]
+  notifications        Notification[]
+
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  managerId   String   @unique @db.Uuid
+  createdAt   DateTime @default(now())
+
+  manager   User   @relation("DepartmentManager", fields: [managerId], references: [id])
+  employees User[] @relation("DepartmentEmployees")
+
+  @@map("departments")
+}
+
+model LeaveType {
+  id               String   @id @default(uuid()) @db.Uuid
+  name             String   @unique
+  description      String?
+  defaultAllowance Int
+  isPaid           Boolean  @default(true)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  leaveRequests LeaveRequest[]
+  leaveBalances LeaveBalance[]
+
+  @@map("leave_types")
+}
+
+model LeaveBalance {
+  id             String @id @default(uuid()) @db.Uuid
+  userId         String @db.Uuid
+  leaveTypeId    String @db.Uuid
+  year           Int
+  totalAllowance Int
+  usedDays       Int    @default(0)
+  pendingDays    Int    @default(0)
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, leaveTypeId, year])
+  @@map("leave_balances")
+}
+
+model LeaveRequest {
+  id                  String             @id @default(uuid()) @db.Uuid
+  userId              String             @db.Uuid
+  leaveTypeId         String             @db.Uuid
+  startDate           DateTime           @db.Date
+  endDate             DateTime           @db.Date
+  totalDays           Int
+  reason              String
+  status              LeaveRequestStatus @default(PENDING_MANAGER)
+  managerComment      String?
+  hrComment           String?
+  reviewedByManagerId String?            @db.Uuid
+  reviewedByHRId      String?            @db.Uuid
+  managerReviewedAt   DateTime?
+  hrReviewedAt        DateTime?
+  createdAt           DateTime           @default(now())
+
+  user              User      @relation("UserLeaveRequests", fields: [userId], references: [id], onDelete: Cascade)
+  leaveType         LeaveType @relation(fields: [leaveTypeId], references: [id])
+  reviewedByManager User?     @relation("ManagerReviews", fields: [reviewedByManagerId], references: [id])
+  reviewedByHR      User?     @relation("HRReviews", fields: [reviewedByHRId], references: [id])
+  notifications     Notification[]
+
+  @@map("leave_requests")
+}
+
+model Notification {
+  id                    String           @id @default(uuid()) @db.Uuid
+  userId                String           @db.Uuid
+  title                 String
+  message               String
+  type                  NotificationType
+  isRead                Boolean          @default(false)
+  relatedLeaveRequestId String?          @db.Uuid
+  createdAt             DateTime         @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leaveRequest LeaveRequest? @relation(fields: [relatedLeaveRequestId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
+}

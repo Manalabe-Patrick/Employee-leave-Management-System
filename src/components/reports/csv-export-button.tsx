@@ -56,7 +56,7 @@ export function CsvExportButton({
       size="sm"
       onClick={handleExport}
       disabled={loading}
-      className="gap-2"
+      className="gap-2 rounded-full"
     >
       {loading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
       Export CSV

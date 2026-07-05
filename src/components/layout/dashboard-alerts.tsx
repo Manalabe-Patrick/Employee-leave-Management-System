@@ -38,7 +38,7 @@ export function DashboardAlerts({
         <Link
           key={alert.href}
           href={alert.href}
-          className="flex items-center gap-3 rounded-lg border-l-4 border-amber-500 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100"
+          className="flex items-center gap-3 rounded-2xl bg-primary/5 px-5 py-4 text-sm font-medium text-foreground ring-1 ring-primary/15 transition-colors hover:bg-primary/10"
         >
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {alert.message}

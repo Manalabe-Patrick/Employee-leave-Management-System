@@ -72,16 +72,16 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="pb-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
                 <CalendarDays className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">LeaveMS</span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="truncate font-bold tracking-tight">LeaveMS</span>
+                <span className="truncate text-xs opacity-60">
                   Leave Management
                 </span>
               </div>
@@ -92,7 +92,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu>
+          <SidebarMenu className="gap-1">
             {commonItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
@@ -110,9 +110,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
         {isManager && (
           <>
-            <SidebarSeparator />
+            <SidebarSeparator className="opacity-40" />
             <SidebarGroup>
-              <SidebarMenu>
+              <SidebarMenu className="gap-1">
                 {managerItems.map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
@@ -132,9 +132,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
         {isHR && (
           <>
-            <SidebarSeparator />
+            <SidebarSeparator className="opacity-40" />
             <SidebarGroup>
-              <SidebarMenu>
+              <SidebarMenu className="gap-1">
                 {hrApprovalItems.map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
@@ -149,9 +149,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 ))}
               </SidebarMenu>
             </SidebarGroup>
-            <SidebarSeparator />
+            <SidebarSeparator className="opacity-40" />
             <SidebarGroup>
-              <SidebarMenu>
+              <SidebarMenu className="gap-1">
                 {hrAdminItems.map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
@@ -174,12 +174,12 @@ export function AppSidebar({ user }: AppSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground font-semibold text-sm">
+              <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-sidebar-primary/10 text-sidebar-primary font-bold text-sm">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="truncate text-xs opacity-50">
                   {user.email}
                 </span>
               </div>
