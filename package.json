@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 192.168.1.89 --port 4055",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start --port 4055",
     "lint": "eslint",
     "db:push": "prisma db push",
