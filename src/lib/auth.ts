@@ -45,12 +45,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.userId = user.id!;
-        token.name = user.name!;
-        token.role = user.role;
-        token.departmentId = user.departmentId;
+    async jwt({ token, user, trigger }) {
+      if (user || trigger === "signIn") {
+        token.loginAt = Math.floor(Date.now() / 1000);
+        token.userId = user!.id!;
+        token.name = user!.name!;
+        token.role = user!.role;
+        token.departmentId = user!.departmentId;
+      }
+      if (token.loginAt && Math.floor(Date.now() / 1000) - token.loginAt > 24 * 60 * 60) {
+        return null;
       }
       return token;
     },

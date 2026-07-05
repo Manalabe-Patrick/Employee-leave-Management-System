@@ -24,5 +24,6 @@ declare module "next-auth/jwt" {
     name: string;
     role: "EMPLOYEE" | "MANAGER" | "HR";
     departmentId: string | null;
+    loginAt: number;
   }
 }
