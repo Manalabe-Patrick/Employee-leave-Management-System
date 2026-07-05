@@ -4,7 +4,14 @@ import { compare } from "bcryptjs";
 import { db } from "@/lib/db";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60,
+    updateAge: 0,
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60,
+  },
   pages: {
     signIn: "/login",
   },
