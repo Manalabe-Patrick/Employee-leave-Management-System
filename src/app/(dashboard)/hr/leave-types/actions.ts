@@ -7,7 +7,7 @@ import {
   updateLeaveType,
   toggleLeaveTypeActive,
 } from "@/services/leave.service";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { Prisma } from "@/generated/prisma/client";
 
 async function requireHR() {
   const session = await auth();
@@ -42,7 +42,7 @@ export async function createLeaveTypeAction(formData: FormData) {
       isPaid,
     });
   } catch (error: unknown) {
-    if (error instanceof PrismaClientKnownRequestError && error.code === "P2002") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { success: false, error: "A leave type with this name already exists" };
     }
     return { success: false, error: "Failed to create leave type" };
@@ -77,7 +77,7 @@ export async function updateLeaveTypeAction(id: string, formData: FormData) {
       isPaid,
     });
   } catch (error: unknown) {
-    if (error instanceof PrismaClientKnownRequestError && error.code === "P2002") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { success: false, error: "A leave type with this name already exists" };
     }
     return { success: false, error: "Failed to update leave type" };

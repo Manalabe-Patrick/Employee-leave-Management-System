@@ -7,7 +7,7 @@ import {
   updateDepartment,
   deleteDepartment,
 } from "@/services/department.service";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { Prisma } from "@/generated/prisma/client";
 
 async function requireHR() {
   const session = await auth();
@@ -39,7 +39,7 @@ export async function createDepartmentAction(formData: FormData) {
       managerId,
     });
   } catch (error: unknown) {
-    if (error instanceof PrismaClientKnownRequestError && error.code === "P2002") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const target = error.meta?.target as string[] | undefined;
       if (target?.includes("managerId")) {
         return { success: false, error: "This user already manages another department" };
@@ -75,7 +75,7 @@ export async function updateDepartmentAction(id: string, formData: FormData) {
       managerId,
     });
   } catch (error: unknown) {
-    if (error instanceof PrismaClientKnownRequestError && error.code === "P2002") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const target = error.meta?.target as string[] | undefined;
       if (target?.includes("managerId")) {
         return { success: false, error: "This user already manages another department" };
