@@ -8,7 +8,8 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+    secureCookie: request.nextUrl.protocol === "https:",
   });
 
   if (pathname === "/") {
